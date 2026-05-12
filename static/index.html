@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CPA Codex 账号管理面板</title>
+    <link rel="stylesheet" href="/static/styles.css?v=20260512-token-refresh-actions" />
+  </head>
+  <body>
+    <div id="loginModal" class="modal">
+      <div class="modal-card">
+        <h2>登录 CPA Codex Panel</h2>
+        <p class="muted">请输入管理员口令后进入面板。</p>
+        <form id="loginForm">
+          <input id="loginToken" type="password" placeholder="管理员口令" autocomplete="current-password" />
+          <button type="submit">登录</button>
+        </form>
+        <p id="loginError" class="error-text"></p>
+      </div>
+    </div>
+
+    <header class="page-header page-header-compact">
+      <div class="page-header-main page-header-main-inline">
+        <h1>CPA Codex 账号管理</h1>
+        <p id="scanMeta" class="muted scan-meta-line">正在加载面板数据…</p>
+      </div>
+      <div class="header-actions">
+        <button id="refreshBtn" class="secondary">强制刷新</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="tabs-shell">
+        <div class="tabs-nav">
+          <button id="accountListTab" class="tab-btn active" type="button">账号列表</button>
+          <button id="disabledRefreshTab" class="tab-btn" type="button">Disabled Refresh</button>
+        </div>
+
+        <section id="accountListPanel" class="tab-panel active">
+          <section class="panel-card">
+            <div class="section-title-row section-title-stack">
+              <div>
+                <h2>账号列表</h2>
+                <p class="section-subtitle">保留全选/多选/批量操作，同时把单账号操作收敛到表格操作列。</p>
+              </div>
+              <div class="results-meta" id="resultsMeta"></div>
+            </div>
+
+            <div class="toolbar">
+              <input id="searchInput" type="search" placeholder="搜索邮箱、文件名、分组、备注、账号 ID、auth index、模型" />
+              <select id="statusSelect">
+                <option value="">全部状态</option>
+              </select>
+              <select id="quotaErrorSelect">
+                <option value="">全部额度状态</option>
+              </select>
+              <select id="groupSelect">
+                <option value="">全部分组</option>
+              </select>
+              <select id="pageSizeSelect">
+                <option value="25">25 / 页</option>
+                <option value="50" selected>50 / 页</option>
+                <option value="100">100 / 页</option>
+              </select>
+            </div>
+
+            <div class="list-actions">
+              <label class="checkbox-row compact">
+                <input id="selectAllDeactivated" type="checkbox" />
+                <span>选中本页全部可操作账号</span>
+              </label>
+              <div class="list-actions-right">
+                <span id="selectedMeta" class="muted">已选 0 个账号</span>
+                <button id="clearSelectionBtn" class="secondary" type="button">清空选择</button>
+                <button id="batchEnableBtn" class="secondary" type="button">批量启用禁用账号</button>
+                <button id="batchRefreshRecoverBtn" class="secondary" type="button">批量检查 Limit 并恢复</button>
+                <button id="batchTokenRefreshBtn" class="secondary" type="button">批量刷新 Token</button>
+                <button id="downloadDisabledUnrefreshedBtn" class="secondary" type="button" disabled>打包下载异常 JSON（缺 refresh token / Token 过期 / 已过期）</button>
+                <button id="batchDeleteBtn" class="danger-outline" type="button">批量删除可删除账号</button>
+                <button id="deleteAllDeactivatedBtn" class="danger-solid" type="button">一键清空全部迁移停用账号</button>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th class="checkbox-cell">选择</th>
+                    <th>状态</th>
+                    <th>账号</th>
+                    <th>分组 / 标签</th>
+                    <th>套餐</th>
+                    <th class="sortable-th" data-sort-by="expires_at">到期时间 <span class="sort-indicator"></span></th>
+                    <th class="sortable-th" data-sort-by="last_refresh">最后刷新 <span class="sort-indicator"></span></th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="accountsTbody">
+                  <tr>
+                    <td colspan="8" class="empty-cell">暂无数据</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="pagination">
+              <button id="prevPageBtn" class="secondary">上一页</button>
+              <span id="pageInfo">第 1 页</span>
+              <button id="nextPageBtn" class="secondary">下一页</button>
+            </div>
+          </section>
+        </section>
+
+        <section id="disabledRefreshPanel" class="tab-panel hidden">
+          <section class="panel-card" id="disabledRefreshCard">
+            <div class="section-title-row section-title-stack">
+              <div>
+                <h2>Disabled Refresh 观测</h2>
+                <p class="section-subtitle">观察 legacy disabled fallback、最近一轮结果，以及 token_expired 阻塞分布。</p>
+              </div>
+              <div class="list-actions-right">
+                <button id="downloadDisabledRefreshResultBtn" class="secondary" type="button">下载最近结果 JSON</button>
+                <button id="runDisabledRefreshBtn" class="secondary" type="button">立即执行一轮</button>
+              </div>
+            </div>
+            <p id="disabledRefreshMeta" class="muted">正在加载 disabled refresh 状态…</p>
+            <div id="disabledRefreshDetails" class="empty-state">当前还没有 disabled refresh 结果。</div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <div id="detailModal" class="modal hidden">
+      <div class="modal-card modal-card-wide detail-modal-card">
+        <div class="modal-header">
+          <div>
+            <h2 id="detailModalTitle">认证文件详情 / 编辑</h2>
+            <p id="detailModalSubtitle" class="muted">在这里查看认证文件详情、切换启用状态，并手动刷新额度。</p>
+          </div>
+          <button id="detailModalCloseBtn" class="icon-button" type="button" title="关闭">✕</button>
+        </div>
+
+        <section class="detail-actions-panel">
+          <div class="detail-actions-header">
+            <div>
+              <h3>运行操作</h3>
+              <p class="muted">这里可以像 CPA 面板一样手动启用/停用账号，并刷新 Codex 额度。</p>
+            </div>
+            <div class="detail-actions-buttons">
+              <button id="detailToggleStatusBtn" class="secondary" type="button">切换状态</button>
+              <button id="detailRefreshQuotaBtn" class="secondary" type="button">刷新额度</button>
+            </div>
+          </div>
+          <p id="detailActionHint" class="muted detail-action-hint">请选择一个账号后进行操作。</p>
+        </section>
+
+        <div class="detail-list" id="detailList"></div>
+
+        <section class="quota-section">
+          <div class="section-title-row quota-title-row">
+            <div>
+              <h3>Codex 额度</h3>
+              <p id="quotaMeta" class="muted">点击“刷新额度”后查看当前账号的额度窗口。</p>
+            </div>
+          </div>
+          <div id="quotaEmpty" class="empty-state quota-empty">
+            当前还没有额度数据，请先点击“刷新额度”。
+          </div>
+          <div id="quotaContent" class="quota-content hidden"></div>
+        </section>
+
+        <form id="metaForm" class="meta-form">
+          <label>
+            <span>分组</span>
+            <input id="metaGroup" type="text" placeholder="如：生产组 / 备用组" />
+          </label>
+          <label>
+            <span>负责人</span>
+            <input id="metaOwner" type="text" placeholder="如：admin / 小组名" />
+          </label>
+          <label>
+            <span>标签</span>
+            <input id="metaTags" type="text" placeholder="多个标签用英文逗号分隔" />
+          </label>
+          <label>
+            <span>备注</span>
+            <textarea id="metaNote" rows="5" placeholder="记录账号用途、限制或异常说明"></textarea>
+          </label>
+          <label class="checkbox-row">
+            <input id="metaStarred" type="checkbox" />
+            <span>星标账号</span>
+          </label>
+          <button type="submit">保存元数据</button>
+          <p id="saveMetaText" class="muted"></p>
+        </form>
+
+        <div id="detailDangerZone" class="detail-danger hidden">
+          <h3>危险操作</h3>
+          <p class="muted">仅允许删除已迁移停用账号。删除前会先做本地备份，然后从停用归档目录移除。</p>
+          <button id="detailDeleteBtn" class="danger-outline" type="button">删除这个迁移停用账号</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="/static/app.js?v=20260512-token-refresh-actions"></script>
+  </body>
+</html>

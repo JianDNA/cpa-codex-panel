@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily backup for CPA related service data
+
+[Timer]
+OnCalendar=*-*-* 03:00:00
+Persistent=true
+Unit=cpa-file-backup.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,86 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">CPA Codex Panel Architecture Overview</title>
+  <desc id="desc">A dark themed architecture overview showing Browser, CPA Codex Panel, CLIProxyAPI Management API, auth files, deactivated archive, runtime data, and backup script.</desc>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="60" x2="1200" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1020"/>
+      <stop offset="1" stop-color="#121A30"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#18233F"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="panelPrimary" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#2854FF"/>
+      <stop offset="1" stop-color="#1F3FC3"/>
+    </linearGradient>
+    <filter id="shadow" x="0" y="0" width="1280" height="720" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M1 1L11 6L1 11" stroke="#8EA2C9" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="720" rx="28" fill="url(#bg)"/>
+  <circle cx="1120" cy="110" r="170" fill="#1C2E6A" opacity="0.18"/>
+  <circle cx="180" cy="660" r="220" fill="#2854FF" opacity="0.10"/>
+
+  <text x="84" y="98" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="40" font-weight="700">CPA Codex Panel</text>
+  <text x="84" y="138" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="20">面向运营 / 运维场景的 CPA / CLIProxyAPI 账号管理面板</text>
+
+  <g filter="url(#shadow)">
+    <rect x="88" y="220" width="240" height="108" rx="24" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="120" y="264" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="26" font-weight="700">Browser / Operator</text>
+    <text x="120" y="300" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">登录、筛选、批量操作、观测</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="430" y="168" width="420" height="212" rx="28" fill="url(#panelPrimary)" stroke="#6C8FFF" stroke-width="2"/>
+    <text x="466" y="224" fill="#FFFFFF" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="34" font-weight="700">CPA Codex Panel</text>
+    <text x="466" y="268" fill="#DBE7FF" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="20">Python stdlib HTTP server + Vanilla JS UI</text>
+    <text x="466" y="316" fill="#F3F7FF" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">• 账号列表 / 详情 / 批量操作</text>
+    <text x="466" y="348" fill="#F3F7FF" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">• Codex 额度刷新与自动恢复</text>
+    <text x="466" y="380" fill="#F3F7FF" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">• 分组 / 标签 / 备注 / 星标 / Disabled Refresh 观测</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="916" y="126" width="278" height="96" rx="24" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="946" y="166" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700">Management API</text>
+    <text x="946" y="198" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="17">/get-auth-status · /auth-files · /config</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="916" y="254" width="278" height="92" rx="24" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="946" y="294" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700">Auth Files</text>
+    <text x="946" y="324" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="17">账号文件目录 / refresh token / metadata</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="916" y="378" width="278" height="92" rx="24" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="946" y="418" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700">Deactivated Archive</text>
+    <text x="946" y="448" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="17">迁移停用账号目录 / 归档删除</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="916" y="502" width="278" height="92" rx="24" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="946" y="542" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="24" font-weight="700">Runtime Data</text>
+    <text x="946" y="572" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="17">会话 / 元数据 / 导出结果 / 运行态文件</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="430" y="468" width="420" height="126" rx="28" fill="url(#panel)" stroke="#2A4068" stroke-width="2"/>
+    <text x="466" y="514" fill="#E8EEFC" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="28" font-weight="700">Backup Script</text>
+    <text x="466" y="548" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">backup_service_data.py</text>
+    <text x="466" y="578" fill="#CBD7F3" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="17">定时归档 auth / deactivated / panel / config 相关关键目录</text>
+  </g>
+
+  <path d="M328 274H410" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M850 174H892" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M850 298H892" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M850 422H892" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M850 546H892" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M640 466V402" stroke="#8EA2C9" stroke-width="3" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <text x="84" y="662" fill="#8EA2C9" font-family="Inter, PingFang SC, Microsoft YaHei, sans-serif" font-size="18">Public repo focus: code + examples + docs. Runtime data and secrets stay outside the repository.</text>
+</svg>

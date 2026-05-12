@@ -1,0 +1,33 @@
+# local env
+.env
+.env.*
+!.env.example
+
+# runtime data
+data/
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# backup output
+*.tar.gz
+*.zip
+cpa-service-backups/
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+
+# local build / temp
+.tmp/
+*.local
+
+# editor / os
+.DS_Store
+.vscode/
+.idea/

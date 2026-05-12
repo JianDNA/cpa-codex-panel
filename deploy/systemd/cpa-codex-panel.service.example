@@ -1,0 +1,14 @@
+[Unit]
+Description=CPA Codex Account Panel
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/cpa-codex-panel
+EnvironmentFile=/etc/cpa-codex-panel/panel.env
+ExecStart=/usr/bin/python3 /opt/cpa-codex-panel/app.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

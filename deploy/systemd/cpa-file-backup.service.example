@@ -1,0 +1,9 @@
+[Unit]
+Description=Backup CPA related service data
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/cpa-codex-panel
+EnvironmentFile=/etc/cpa-codex-panel/panel.env
+ExecStart=/usr/bin/python3 /opt/cpa-codex-panel/backup_service_data.py
