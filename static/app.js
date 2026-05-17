@@ -280,7 +280,6 @@ function isDisabledAccount(account) {
 function isRefreshSelectableAccount(account) {
   if (!account) return false;
   if (account.status === "deactivated") return false;
-  if (account.quota_error_type === "token_expired") return false;
   return Boolean(account.quota_refresh_supported);
 }
 
@@ -882,7 +881,7 @@ function renderDetail(detail) {
   if (detail.status === "deactivated") {
     detailActionHint.textContent = "已迁移停用账号仅支持删除归档文件，不支持启用/停用或额度刷新。";
   } else if (detail.quota_error_type === "token_expired") {
-    detailActionHint.textContent = "该账号已缓存 Token 过期状态；你可以删除认证文件，或先尝试刷新额度确认状态。";
+    detailActionHint.textContent = "该账号 Token 已过期（仅标记，未禁用）；你可以尝试刷新 Token，或删除认证文件。";
   } else if (!canToggleStatus && !canRefreshQuota) {
     detailActionHint.textContent = "当前账号没有可用的管理接口上下文，暂时无法切换状态或刷新额度。";
   } else if (!canRefreshQuota) {

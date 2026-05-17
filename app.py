@@ -2055,27 +2055,11 @@ class AccountRepository:
             if cache_key:
                 self._quota_cache[cache_key] = quota
             self._apply_runtime_state(account)
-            auto_disabled = False
-            auto_disable_error = ""
-            if quota_error.get("type") == "token_expired" and not bool(account.get("disabled")):
-                try:
-                    self._set_account_status(account, True)
-                    self._set_manual_disabled_marker(account, False)
-                    auto_disabled = True
-                except RuntimeError as exc:
-                    auto_disable_error = str(exc)
             refresh_result = {
                 "ok": False,
                 "type": quota_error.get("type"),
                 "message": quota_error.get("message") or self._api_call_error_message(status_code, body_payload),
             }
-            if auto_disabled:
-                refresh_result["message"] = f"{refresh_result['message']}（已自动禁用账号）"
-                refresh_result["auto_disabled"] = True
-            elif auto_disable_error:
-                refresh_result["message"] = f"{refresh_result['message']}（自动禁用失败：{auto_disable_error}）"
-                refresh_result["auto_disabled"] = False
-                refresh_result["auto_disable_error"] = auto_disable_error
             account["quota_refresh_result"] = refresh_result
             return refresh_result
 
@@ -2454,30 +2438,18 @@ class AccountRepository:
                 result = self._refresh_codex_token_for_account(account)
             except RuntimeError as exc:
                 self._set_auto_recover_success_streak(account, 0)
-                try:
-                    self._set_account_status(account, True)
-                    self._set_manual_disabled_marker(account, False)
-                except RuntimeError:
-                    pass
                 failed.append({
                     "key": account["key"],
                     "email": account.get("email", ""),
                     "reason": f"Token 刷新失败: {exc}",
-                    "auto_disabled": True,
                 })
                 continue
             except Exception as exc:
                 self._set_auto_recover_success_streak(account, 0)
-                try:
-                    self._set_account_status(account, True)
-                    self._set_manual_disabled_marker(account, False)
-                except RuntimeError:
-                    pass
                 failed.append({
                     "key": account["key"],
                     "email": account.get("email", ""),
                     "reason": f"Token 刷新异常: {exc}",
-                    "auto_disabled": True,
                 })
                 continue
 
