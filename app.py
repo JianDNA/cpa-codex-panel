@@ -586,6 +586,35 @@ class AccountRepository:
             accounts.pop(meta_key, None)
         self._save_meta(meta_root)
 
+    def _mark_token_expired_and_disable(self, account: dict[str, Any]) -> None:
+        """Token 刷新失败时：写入 token_expired 到 quota cache + 禁用账号。"""
+        refreshed_at = utc_now().isoformat()
+        cache_key = self._account_cache_key(account)
+        quota = {
+            "provider": "codex",
+            "status": "error",
+            "email": str(account.get("email") or "").strip(),
+            "plan_type": str(account.get("plan_type") or "").strip(),
+            "rate_limit": None,
+            "code_review_rate_limit": None,
+            "additional_rate_limits": [],
+            "credits": None,
+            "error": {
+                "type": "token_expired",
+                "message": "Token 刷新失败，已标记过期并禁用",
+            },
+            "refreshed_at": refreshed_at,
+        }
+        if cache_key:
+            self._quota_cache[cache_key] = quota
+        self._apply_runtime_state(account)
+        if not bool(account.get("disabled")):
+            try:
+                self._set_account_status(account, True)
+                self._set_manual_disabled_marker(account, False)
+            except RuntimeError:
+                pass
+
     @staticmethod
     def _normalize_management_names(values: Any) -> list[str]:
         if not isinstance(values, list):
@@ -2115,6 +2144,12 @@ class AccountRepository:
             if cache_key:
                 self._quota_cache[cache_key] = quota
             self._apply_runtime_state(account)
+            if quota_error.get("type") == "token_expired" and not bool(account.get("disabled")):
+                try:
+                    self._set_account_status(account, True)
+                    self._set_manual_disabled_marker(account, False)
+                except RuntimeError:
+                    pass
             refresh_result = {
                 "ok": False,
                 "type": quota_error.get("type"),
@@ -2498,18 +2533,22 @@ class AccountRepository:
                 result = self._refresh_codex_token_for_account(account)
             except RuntimeError as exc:
                 self._set_auto_recover_success_streak(account, 0)
+                self._mark_token_expired_and_disable(account)
                 failed.append({
                     "key": account["key"],
                     "email": account.get("email", ""),
                     "reason": f"Token 刷新失败: {exc}",
+                    "auto_disabled": True,
                 })
                 continue
             except Exception as exc:
                 self._set_auto_recover_success_streak(account, 0)
+                self._mark_token_expired_and_disable(account)
                 failed.append({
                     "key": account["key"],
                     "email": account.get("email", ""),
                     "reason": f"Token 刷新异常: {exc}",
+                    "auto_disabled": True,
                 })
                 continue
 
