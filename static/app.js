@@ -269,7 +269,7 @@ function summarizeQuotaStatus(quota) {
 
 function isDeletableAccount(account) {
   if (!account) return false;
-  return account.status === "deactivated" || account.quota_error_type === "token_expired";
+  return account.status === "deactivated" || account.quota_error_type === "token_expired" || account.status === "disabled";
 }
 
 function isDisabledAccount(account) {
@@ -303,6 +303,7 @@ function deleteScopeLabel(account) {
   if (!account) return "账号";
   if (account.status === "deactivated") return "迁移停用账号";
   if (account.quota_error_type === "token_expired") return "Token 过期账号";
+  if (account.status === "disabled") return "已禁用账号";
   return "账号";
 }
 
@@ -850,6 +851,10 @@ function renderDetail(detail) {
     detailDangerTitle.textContent = "删除 Token 过期账号";
     detailDangerText.textContent = "该账号会从主认证目录删除，删除前会先做本地备份。";
     detailDeleteBtn.textContent = "删除这个 Token 过期账号";
+  } else if (detail.status === "disabled") {
+    detailDangerTitle.textContent = "删除已禁用账号";
+    detailDangerText.textContent = "该账号会从主认证目录删除，删除前会先做本地备份。";
+    detailDeleteBtn.textContent = "删除这个已禁用账号";
   } else {
     detailDangerTitle.textContent = "危险操作";
     detailDangerText.textContent = "删除前会先做本地备份。";
@@ -1295,7 +1300,7 @@ async function deleteSingleAccount(key) {
     return;
   }
   if (!isDeletableAccount(account)) {
-    showToast("仅允许删除已迁移停用或 Token 过期账号", "error");
+    showToast("仅允许删除已禁用、已迁移停用或 Token 过期账号", "error");
     return;
   }
   const confirmed = window.confirm(buildDeleteConfirmMessage([account]));

@@ -1587,6 +1587,8 @@ class AccountRepository:
         token_expired_accounts: list[dict[str, Any]] = []
         failed: list[dict[str, str]] = []
 
+        disabled_accounts_to_delete: list[dict[str, Any]] = []
+
         for key in unique_keys:
             account = account_map.get(key)
             if account is None:
@@ -1598,11 +1600,14 @@ class AccountRepository:
             if str(account.get("quota_error_type") or "").strip() == "token_expired":
                 token_expired_accounts.append(account)
                 continue
+            if bool(account.get("disabled")):
+                disabled_accounts_to_delete.append(account)
+                continue
             failed.append(
                 {
                     "key": key,
                     "email": account.get("email", ""),
-                    "reason": "仅支持删除已迁移停用或 Token 过期账号",
+                    "reason": "仅支持删除已禁用、已迁移停用或 Token 过期账号",
                 }
             )
 
@@ -1669,6 +1674,61 @@ class AccountRepository:
                     if name in deleted_names_set or name in failed_name_set:
                         continue
                     account = account_by_name.get(name)
+                    if account is not None:
+                        failed.append({"key": account["key"], "email": account.get("email", ""), "reason": "删除结果未知，请稍后刷新确认"})
+
+        if disabled_accounts_to_delete:
+            backup_root = self.settings.meta_path.parent / "disabled-delete-backups"
+            backup_root.mkdir(parents=True, exist_ok=True)
+            batch_backup_dir = backup_root / f"batch_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+            batch_backup_dir.mkdir(parents=True, exist_ok=True)
+
+            disabled_request_names: list[str] = []
+            disabled_account_by_name: dict[str, dict[str, Any]] = {}
+            for account in disabled_accounts_to_delete:
+                source_file = str(account.get("source_file") or "").strip()
+                if not source_file:
+                    failed.append({"key": account["key"], "email": account.get("email", ""), "reason": "缺少源文件名，无法删除"})
+                    continue
+                disabled_account_by_name[source_file] = account
+                disabled_request_names.append(source_file)
+                source_path = self.settings.auth_dir / source_file
+                if source_path.exists():
+                    try:
+                        shutil.copy2(source_path, batch_backup_dir / source_file)
+                    except OSError as exc:
+                        failed.append({"key": account["key"], "email": account.get("email", ""), "reason": f"备份失败：{exc}"})
+
+            if disabled_request_names:
+                delete_result = self.management.delete_auth_files(disabled_request_names)
+                deleted_names = self._normalize_management_names(delete_result.get("files"))
+                deleted_names_set = set(deleted_names)
+                failed_items = self._normalize_management_failed(delete_result.get("failed"))
+                failed_name_set = {item.get("name", "") for item in failed_items}
+                deleted_count = safe_int(str(delete_result.get("deleted") or "0"), 0)
+                if not deleted_names_set and deleted_count == len(disabled_request_names) and not failed_items:
+                    deleted_names_set = set(disabled_request_names)
+
+                for name in deleted_names_set:
+                    account = disabled_account_by_name.get(name)
+                    if account is not None:
+                        deleted_accounts.append(account)
+
+                for item in failed_items:
+                    name = item.get("name", "")
+                    account = disabled_account_by_name.get(name)
+                    failed.append(
+                        {
+                            "key": account.get("key", name) if account else name,
+                            "email": account.get("email", "") if account else "",
+                            "reason": item.get("reason") or "删除失败",
+                        }
+                    )
+
+                for name in disabled_request_names:
+                    if name in deleted_names_set or name in failed_name_set:
+                        continue
+                    account = disabled_account_by_name.get(name)
                     if account is not None:
                         failed.append({"key": account["key"], "email": account.get("email", ""), "reason": "删除结果未知，请稍后刷新确认"})
 
